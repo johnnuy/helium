@@ -1,0 +1,4 @@
+# platinum postgres configuration
+spring.datasource.platinum.url=jdbc:postgresql://<host>:<port>/platinum_dev
+spring.datasource.platinum.username=<user>
+spring.datasource.platinum.password=<password>

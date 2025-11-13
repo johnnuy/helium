@@ -1,0 +1,28 @@
+# https://dreampuf.github.io/GraphvizOnline
+
+digraph Service {
+
+    location
+    season
+    team
+    teamRegistration -> team
+    teamRegistration -> season
+    player
+    playerRegistration -> player
+    playerRegistration -> season
+    rosterEntry -> playerRegistration
+    rosterEntry -> teamRegistration
+    game -> season
+    game -> team 
+    game -> team
+    game -> location
+    event -> season
+    event -> location
+    user
+    user -> role
+    user -> user_oauth
+    user -> user_local
+    user -> user_signin
+    player -> user 
+    disciplinaryAction -> rosterEntry
+}
