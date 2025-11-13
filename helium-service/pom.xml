@@ -69,11 +69,6 @@
 			</exclusions>
 		</dependency>
 		
-		<dependency>
-			<groupId>org.johnnuy.helium</groupId>
-			<artifactId>helium-security</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 	</dependencies>
 
 	<dependencyManagement>

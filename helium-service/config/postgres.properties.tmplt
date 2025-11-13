@@ -1,4 +1,4 @@
-# platinum postgres configuration
-spring.datasource.platinum.url=jdbc:postgresql://<host>:<port>/platinum_dev
-spring.datasource.platinum.username=<user>
-spring.datasource.platinum.password=<password>
+# helium postgres configuration
+spring.datasource.helium.url=jdbc:postgresql://<host>:<port>/helium_dev
+spring.datasource.helium.username=<user>
+spring.datasource.helium.password=<password>
