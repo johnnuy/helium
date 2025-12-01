@@ -17,6 +17,8 @@
 		<module>helium-dependencies</module>
 		<module>helium-test</module>
 		<module>helium-utils</module>
+		<module>helium-domain</module>
+		<module>helium-bidpackage</module>
 		<module>helium-service</module>
 	</modules>
 </project>

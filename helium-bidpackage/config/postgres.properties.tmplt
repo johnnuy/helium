@@ -1,0 +1,4 @@
+# helium postgres configuration
+spring.datasource.helium.url=jdbc:postgresql://<host>:<port>/helium_dev
+spring.datasource.helium.username=<user>
+spring.datasource.helium.password=<password>
