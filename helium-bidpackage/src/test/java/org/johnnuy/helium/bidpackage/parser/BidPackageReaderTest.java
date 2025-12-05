@@ -1,26 +1,23 @@
 package org.johnnuy.helium.bidpackage.parser;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
 import java.util.Optional;
 
+import org.johnnuy.helium.bidpackage.BidPackageTest;
 import org.johnnuy.helium.domain.Pairing;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class BidPackageParserTest {
+public class BidPackageReaderTest {
 
 	@Test
-	void testParseDecember2025() throws IOException {
-		InputStream source = BidPackageParserTest.class.getClassLoader().getResourceAsStream("december_2025.txt");
-		Assertions.assertNotNull(source);
-		
-		BidPackageParser parser = new BidPackageParser(
-				"december_2025",
-				Path.of("./target", "tmp"),
-				new InputStreamReader(source));
+	void testParseSimplePairing() throws IOException {
+		InputStream source = BidPackageTest.class.getClassLoader().getResourceAsStream("pairings/simple.txt");
+		Assertions.assertNotNull(source);		
+		BidPackageReader parser = new BidPackageReader(new BufferedReader(new InputStreamReader(source)));
 		
 		Optional<Pairing> pairing;
 		

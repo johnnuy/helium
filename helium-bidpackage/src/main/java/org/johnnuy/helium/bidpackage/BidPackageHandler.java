@@ -1,4 +1,4 @@
-package org.johnnuy.helium.bidpackage.parser;
+package org.johnnuy.helium.bidpackage;
 
 import java.util.regex.Pattern;
 

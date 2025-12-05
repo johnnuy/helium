@@ -2,14 +2,11 @@ package org.johnnuy.helium.bidpackage.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.regex.Matcher;
 
 import org.apache.commons.lang3.StringUtils;
-import org.johnnuy.helium.bidpackage.reformat.BidPackageReformatter;
+import org.johnnuy.helium.bidpackage.BidPackageHandler;
 import org.johnnuy.helium.domain.CrewCompliment;
 import org.johnnuy.helium.domain.Pairing;
 import org.johnnuy.helium.domain.PairingProvider;
@@ -18,17 +15,12 @@ import org.springframework.util.Assert;
 /**
  * Parser for resolving the pairings from the bid package
  */
-public class BidPackageParser implements PairingProvider, BidPackageHandler {
+public class BidPackageReader implements PairingProvider, BidPackageHandler {
 	
 	private BufferedReader reader;
 
-	public BidPackageParser(String name, Path tmpDir, Reader reader) {
-		try {
-			Files.createDirectories(tmpDir);
-			this.reader = new BidPackageReformatter(name, tmpDir).reformat(new BufferedReader(reader));
-		} catch (IOException ioe) {
-			throw new RuntimeException(ioe);
-		}
+	public BidPackageReader(BufferedReader reader) {
+		this.reader = reader;
 	}
 
 	@Override

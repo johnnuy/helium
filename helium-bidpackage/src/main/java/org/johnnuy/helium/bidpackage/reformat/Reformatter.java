@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.apache.commons.lang3.StringUtils;
-import org.johnnuy.helium.bidpackage.parser.BidPackageHandler;
+import org.johnnuy.helium.bidpackage.BidPackageHandler;
 
-public interface ReformattingStage extends BidPackageHandler {
+public interface Reformatter extends BidPackageHandler {
 
 	BufferedReader reformat(BufferedReader reader) throws IOException;
 	
