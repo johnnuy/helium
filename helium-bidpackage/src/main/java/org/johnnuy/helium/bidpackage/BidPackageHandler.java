@@ -18,5 +18,8 @@ public interface BidPackageHandler {
 	public static String CALENDAR_LINE = CALENDAR_DAYS + " DAY FLT#";
 	
 	public static String CREW_COMP = "CREW COMP";
-	
+
+	public static interface Tokens {
+		public static String TRIP = "TRIP";
+	}
 }

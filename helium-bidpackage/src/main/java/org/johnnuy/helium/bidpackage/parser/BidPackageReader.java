@@ -2,8 +2,11 @@ package org.johnnuy.helium.bidpackage.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.johnnuy.helium.bidpackage.BidPackageHandler;
@@ -15,9 +18,39 @@ import org.springframework.util.Assert;
 /**
  * Parser for resolving the pairings from the bid package
  */
-public class BidPackageReader implements PairingProvider, BidPackageHandler {
+public class BidPackageReader implements PairingProvider {
+
+	private static interface Tokens {
+		public static String TRIP = "TRIP";
+		public static String EFFECTIVE = "effective";
+		public static String NO_EXCEPTIONS = "no exceptions.";
+	}
+
+	private static Pattern TRIP_LINE = Pattern.compile(
+			"%s\\s#([0-9]+)\\sT([0-9A-Z]+)\\s\\(([A-Z]+)\\)\\s\\[([0-9\\,]+)\\]\\s([A-Z]{3}):\\s([^\\s]+)\\s%s\\s(.+)\\s%s"
+			.formatted(Tokens.TRIP, Tokens.EFFECTIVE, Tokens.NO_EXCEPTIONS)
+			);
 	
+	public static void main(String[] args) {
+		List.of(Tokens.TRIP,
+				"#([0-9]+)",
+				"([0-9A-Z]+)"
+				).stream().collect(Collectors.joining("\\s"));
+		
+		Matcher m = TRIP_LINE.matcher("TRIP #1397 T3501 (OL) [0,0,4,0] YYZ: 1______ effective DEC 08-DEC 08 no exceptions.");
+		if (m.matches()) {
+			for (int g=0; g<=m.groupCount();g++) {
+				System.out.println(m.group(g));
+			}
+		}
+		else {
+			System.out.println("DOES NOT MATCH");
+		}
+	}
+
 	private BufferedReader reader;
+
+	private String currentLine = null;
 
 	public BidPackageReader(BufferedReader reader) {
 		this.reader = reader;
@@ -27,36 +60,11 @@ public class BidPackageReader implements PairingProvider, BidPackageHandler {
 	public Optional<Pairing> nextPairing() {
 		try {
 			/* check if there's any more pairings to go */
-			Optional<Integer> trip = skipToNextPairing();
-			if (trip.isEmpty()) {
+			if (!skipToNextPairing()) {
 				return Optional.empty();
 			}
 
-			/* if we found a trip id, then build a pairing from it */
-			Pairing pairing = trip.map(t -> new Pairing().setTripNumber(t)).get();
-
-			/* second line is for the pairing */
-			String currLine = reader.readLine();
-			Matcher currMatcher = PAIRING_PATTERN.matcher(currLine);
-			Assert.isTrue(currMatcher.matches(), "Unable to identify pairingId for trip %d".formatted(pairing.getTripNumber()));
-			pairing.setPairingId(currMatcher.group(1));
-
-			/* third line contains the crew compliment, and the effective days */
-			currLine = reader.readLine();
-			currMatcher = EFFECTIVE_LINE_REGEX.matcher(currLine);
-			Assert.isTrue(currMatcher.matches(), "Unable to parse effective line (%s) for trip %d".formatted(currLine, pairing.getTripNumber()));
-			pairing.setCrewCompliment(new CrewCompliment()
-					.setCaptains(Integer.parseInt(currMatcher.group(3)))
-					.setOfficers(Integer.parseInt(currMatcher.group(4)))
-					.setFlightAttendants(Integer.parseInt(currMatcher.group(5)))
-					.setOther(Integer.parseInt(currMatcher.group(6))));
-
-			/* forth line is a calendar line, nothing here we need */
-			currLine = reader.readLine();
-			Assert.isTrue(StringUtils.startsWith(currLine, CALENDAR_DAYS), "Unable to identifiy calendar line for trip %d".formatted(pairing.getTripNumber()));
-						
-
-			return Optional.of(pairing);
+			return Optional.empty();
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe);
 		}
@@ -68,15 +76,12 @@ public class BidPackageReader implements PairingProvider, BidPackageHandler {
 	 * 
 	 * @throws IOException
 	 */
-	private Optional<Integer> skipToNextPairing() throws IOException {
-		String currLine = null;
-		while ((currLine = reader.readLine()) != null) {
-			Matcher m = TRIP_LINE.matcher(currLine);
-			if (m.matches()) {
-				return Optional.of(Integer.parseInt(m.group(2)));
+	private boolean skipToNextPairing() throws IOException {
+		while ((currentLine = reader.readLine()) != null) {
+			if (StringUtils.startsWith(currentLine, Tokens.TRIP)) {
+				return true;
 			}
 		}
-		return Optional.empty();
+		return false;
 	}
-
 }
