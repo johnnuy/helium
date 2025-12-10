@@ -1,7 +1,9 @@
 package org.johnnuy.helium.domain;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.springframework.util.Assert;
 
 public class CrewCompliment {
 
@@ -9,6 +11,24 @@ public class CrewCompliment {
 	private Integer officers;
 	private Integer flightAttendants;
 	private Integer other;
+	
+	public CrewCompliment() {}
+	
+	public CrewCompliment(String value) {
+		Assert.notNull(value, "Crew compliment cannot be null");		
+		Assert.isTrue(value.matches("\\[[0-9],[0-9],[0-9],[0-9]\\]"), "Not a valid crew compliment string");
+		String[] components = StringUtils.split(
+				StringUtils.remove(
+						StringUtils.remove(value, "["), 
+						"]"), 
+				",");
+		captains = Integer.parseInt(components[0]);
+		officers = Integer.parseInt(components[1]);
+		flightAttendants = Integer.parseInt(components[2]);
+		other = Integer.parseInt(components[3]);
+	}
+	
+	
 	
 	public Integer getCaptains() {
 		return captains;

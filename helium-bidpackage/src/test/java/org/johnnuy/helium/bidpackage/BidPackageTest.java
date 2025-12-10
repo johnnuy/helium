@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import org.johnnuy.helium.bidpackage.parser.BidPackageReader;
-import org.johnnuy.helium.bidpackage.reformat.December2025Reformatter;
+import org.johnnuy.helium.bidpackage.reformat.BidPackageReformatterV1;
 import org.johnnuy.helium.domain.Pairing;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ public class BidPackageTest {
 		InputStream source = BidPackageTest.class.getClassLoader().getResourceAsStream("december_2025.txt");
 		Assertions.assertNotNull(source);
 		
-		December2025Reformatter reformatter = new December2025Reformatter(
+		BidPackageReformatterV1 reformatter = new BidPackageReformatterV1(
 				"december_2025",
 				Path.of("./target", "tmp"));
 		

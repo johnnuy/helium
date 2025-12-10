@@ -2,14 +2,13 @@ package org.johnnuy.helium.bidpackage.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
-import org.johnnuy.helium.bidpackage.BidPackageHandler;
 import org.johnnuy.helium.domain.CrewCompliment;
 import org.johnnuy.helium.domain.Pairing;
 import org.johnnuy.helium.domain.PairingProvider;
@@ -20,33 +19,22 @@ import org.springframework.util.Assert;
  */
 public class BidPackageReader implements PairingProvider {
 
-	private static interface Tokens {
-		public static String TRIP = "TRIP";
-		public static String EFFECTIVE = "effective";
-		public static String NO_EXCEPTIONS = "no exceptions.";
-	}
-
-	private static Pattern TRIP_LINE = Pattern.compile(
-			"%s\\s#([0-9]+)\\sT([0-9A-Z]+)\\s\\(([A-Z]+)\\)\\s\\[([0-9\\,]+)\\]\\s([A-Z]{3}):\\s([^\\s]+)\\s%s\\s(.+)\\s%s"
-			.formatted(Tokens.TRIP, Tokens.EFFECTIVE, Tokens.NO_EXCEPTIONS)
-			);
+	static String EFFECTIVE = "effective\\s(.+)";
+	static String EXCEPTIONS = "(no exceptions.|except)(?:\\s(.+))?";
 	
-	public static void main(String[] args) {
-		List.of(Tokens.TRIP,
-				"#([0-9]+)",
-				"([0-9A-Z]+)"
-				).stream().collect(Collectors.joining("\\s"));
-		
-		Matcher m = TRIP_LINE.matcher("TRIP #1397 T3501 (OL) [0,0,4,0] YYZ: 1______ effective DEC 08-DEC 08 no exceptions.");
-		if (m.matches()) {
-			for (int g=0; g<=m.groupCount();g++) {
-				System.out.println(m.group(g));
-			}
-		}
-		else {
-			System.out.println("DOES NOT MATCH");
-		}
-	}
+	static String[] TRIP_COMPONENTS = new String[] {
+			"TRIP",					// 
+			"#([0-9]+)",			// Trip #
+			"([A-Z][0-9A-Z]+)",		// Pairing ID
+			"\\(([A-Z]+)\\)",		// OL?
+			"(\\[[0-9\\,]+\\])",	// Crew Compliment
+			"([A-Z]{3}):",			// Base Airport Code
+			"([^\\s]+)",			// Day Mask
+			EFFECTIVE,				// Effective Dates
+			EXCEPTIONS  			// Exception Dates
+	};
+
+	static Pattern TRIP_LINE = Pattern.compile(Stream.of(TRIP_COMPONENTS).collect(Collectors.joining("\\s")));
 
 	private BufferedReader reader;
 
@@ -63,8 +51,19 @@ public class BidPackageReader implements PairingProvider {
 			if (!skipToNextPairing()) {
 				return Optional.empty();
 			}
-
-			return Optional.empty();
+			
+			Matcher m = TRIP_LINE.matcher(currentLine);
+			Assert.isTrue(m.matches(), "Unable to parse Trip Line '%s'".formatted(currentLine));
+			
+			Pairing pairing = new Pairing()
+					.setTripNumber(Integer.parseInt(m.group(1)))
+					.setPairingId(m.group(2))
+					.setCrewCompliment(new CrewCompliment(m.group(4)));
+			
+			currentLine = reader.readLine();
+			Assert.state("MO TU WE TH FR SA SU DAY FLT# DEP ARR DEP ARR BLK TOG DUTY CREDIT LO A/C CREW COMP".equals(currentLine), "Invalid second line %s".formatted(currentLine));
+			
+			return Optional.of(pairing);
 		} catch (IOException ioe) {
 			throw new RuntimeException(ioe);
 		}
@@ -78,7 +77,7 @@ public class BidPackageReader implements PairingProvider {
 	 */
 	private boolean skipToNextPairing() throws IOException {
 		while ((currentLine = reader.readLine()) != null) {
-			if (StringUtils.startsWith(currentLine, Tokens.TRIP)) {
+			if (StringUtils.startsWith(currentLine, TRIP_COMPONENTS[0])) {
 				return true;
 			}
 		}

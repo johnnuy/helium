@@ -19,7 +19,7 @@ public class BidPackageReformatterTest {
 		InputStream source = BidPackageTest.class.getClassLoader().getResourceAsStream("foxit/december_2025/%s.txt".formatted(airport));
 		Assertions.assertNotNull(source);
 
-		December2025Reformatter reformatter = new December2025Reformatter(
+		BidPackageReformatterV1 reformatter = new BidPackageReformatterV1(
 				"foxit_december_2025_%s".formatted(airport),
 				Path.of("./target", "tmp"));
 
